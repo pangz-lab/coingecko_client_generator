@@ -14,12 +14,12 @@ void main() {
     test('create definition without parameters', () {
       sut = MethodDefinition(
         template: methodTemplate,
+        endpointPath: "/ping",
         name: "callTest",
       );
       var content = sut!.toString();
       expect(content, '''
   Future<Response> callTest() async {
-    _path = _baseEndpoint;
     return await send(_path);
   }''');
     });
@@ -28,11 +28,10 @@ void main() {
       sut = MethodDefinition(
           template: methodTemplate,
           name: "callTest",
+          endpointPath: "/ping",
           parameters: {
-            'name': ParameterDefinition(
-                name: 'name', dataType: 'String', required: true),
-            'name_key': ParameterDefinition(
-                name: 'name_key', dataType: 'String', required: false),
+            'name': ParameterDefinition(name: 'name', dataType: 'String', required: true),
+            'name_key': ParameterDefinition(name: 'name_key', dataType: 'String', required: false),
           });
       var content = sut!.toString();
       expect(content, '''
@@ -40,14 +39,13 @@ void main() {
     required String name,
     String? nameKey
   }) async {
-    _path = _baseEndpoint;
-    List<String> keyValueList = [];
-    keyValueList.addAll([
-      setQueryKeyValue('name', name),
-      setQueryKeyValue('name_key', nameKey)
-    ]);
-    keyValueList.removeWhere((e) => e.trim().isEmpty);
-    _path += keyValueList.join('&');
+    _path = createEndpointUrlPath(
+      rawQueryItems: {
+        'name': name,
+        'name_key': nameKey
+      },
+      endpointPath: "/ping"
+    );
     return await send(_path);
   }''');
     });

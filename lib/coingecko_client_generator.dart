@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:coingecko_client_generator/models/api_endpoint_definition.dart';
+import 'package:coingecko_client_generator/models/api_parameter_definition.dart';
 import 'package:coingecko_client_generator/models/class_definition.dart';
 import 'package:coingecko_client_generator/models/method_definition.dart';
 import 'package:coingecko_client_generator/models/parameter_definition.dart';
@@ -11,12 +12,14 @@ class CoinGeckoClientGenerator {
   ApiDefinitionParser parser;
   String classTemplatePath;
   String methodTemplatePath;
+  String generatedFileBaseDir;
   String _classTemplate = "";
   String _methodTemplate = "";
   CoinGeckoClientGenerator(
     this.parser,
     this.classTemplatePath,
-    this.methodTemplatePath
+    this.methodTemplatePath,
+    this.generatedFileBaseDir,
   ) {
     _classTemplate = _getTemplateContent(classTemplatePath);
     _methodTemplate = _getTemplateContent(methodTemplatePath);
@@ -51,15 +54,17 @@ class CoinGeckoClientGenerator {
         MethodDefinition(
           template: _methodTemplate,
           name: _convertPathToMethodName(endpointMember),
+          endpointPath: _replaceEndpointPathWithValue(endpointMember, endpointDefinition.parameters),
           parameters: endpointDefinition.parameters.map(
             (key, param) {
               return MapEntry(
                 param.name,
                 ParameterDefinition(
-                name: param.name,
-                dataType: param.type,
-                required: param.required
-              ));
+                  name: param.name,
+                  dataType: param.type,
+                  required: param.required
+                )
+              );
             })
         )
       );
@@ -67,10 +72,24 @@ class CoinGeckoClientGenerator {
     return methodDefinitionList;
   }
 
+  String _replaceEndpointPathWithValue(String path, Map<String, ApiParameterDefinition> parameters) {
+    if(!path.contains("{")) { return path; }
+    return path.split("/").map(
+      (e) {
+        if(e.contains("{")) {
+          var key = e.replaceAll("{","")
+          .replaceAll("}","");
+          return "\$${_convertNameToLowerCamelCase(parameters[key]!.name)}";
+        }
+        return e;
+      }
+    ).join("/");
+  }
+
   Map<String, String> _createClassAndFileName(String name) {
     return {
       "file": _createCleanFileName("${name}_endpoint.dart"),
-      "class": "${_convertNameToUpperCamelCase(name)}Endpoint"
+      "class": "${_convertNameToUpperCamelCase(_createCleanFileName(name))}Endpoint"
     };
   }
 
@@ -82,9 +101,20 @@ class CoinGeckoClientGenerator {
   String _convertPathToMethodName(String path) {
     return "get${path.split("/").map(
       (e) {
-        if(e.isEmpty || e.startsWith("{")) { return ""; }
+        if(e.isEmpty) { return ""; }
+        if(e.startsWith("{")) {
+          return "With${_convertNameToUpperCamelCase(e
+            .replaceAll("{", "")
+            .replaceAll("}", "")
+          )}";
+        }
         return _convertNameToUpperCamelCase(e);
       }).toList().join("")}";
+  }
+
+  String _convertNameToLowerCamelCase(String name) {
+    name = _convertNameToUpperCamelCase(name);
+    return name[0].toLowerCase() + name.substring(1);
   }
 
   String _convertNameToUpperCamelCase(String name) {
@@ -100,7 +130,7 @@ class CoinGeckoClientGenerator {
   }
 
   Future<void> _generateClassFile(String folderName, String fileName, ClassDefinition classDefinition) async {
-    var directory = 'generated_class/${_createCleanFileName(folderName)}';
+    var directory = '$generatedFileBaseDir/${_createCleanFileName(folderName)}';
     Directory(directory).createSync(recursive: true);
     await FileGenerator.generate("$directory/$fileName", classDefinition.toString());
   }
@@ -110,32 +140,3 @@ class CoinGeckoClientGenerator {
     return classFile.readAsStringSync();
   }
 }
-// var parser = ApiDefinitionParser('coingecko-api.v3.json');
-// print(parser.apiDefinitionMap);
-
-// Map<String, dynamic> getApiDefinition(String filePath) {
-//   var apiDefinition = File(filePath);
-//   return Map<String, dynamic>.from(jsonDecode(apiDefinition.readAsStringSync()));
-// }
-
-// String getClassTemplate(String templatefile) {
-//   var classFile = File(templatefile);
-//   return classFile.readAsStringSync();
-// }
-
-// String defineClassContent({
-//   required ClassFileDefinition classDefinition,
-//   required String template
-// }) {
-//    return template.replaceAll('CLASS_NAME', classDefinition.name)
-//     .replaceAll('BASE_ENDPOINT', classDefinition.baseEndpoint)
-//     .replaceAll('METHODS', classDefinition.stringifyParameters());
-// }
-
-// Future<void> generateClassFile(String filePath, String definition) async {
-//   var classFile = File(filePath);
-//   var sink = classFile.openWrite();
-//   sink.write(definition);
-//   await sink.flush();
-//   await sink.close();
-// }

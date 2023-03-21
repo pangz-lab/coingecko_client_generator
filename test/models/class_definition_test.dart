@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:coingecko_client_generator/coingecko_client_generator.dart';
 import 'package:coingecko_client_generator/models/class_definition.dart';
 import 'package:coingecko_client_generator/models/method_definition.dart';
 import 'package:coingecko_client_generator/models/parameter_definition.dart';
@@ -21,7 +20,7 @@ void main() {
           template: classTemplate,
           name: "PingEndpoint",
           baseEndpoint: "/ping",
-          methods: [MethodDefinition(template: methodTemplate, name: "call")]);
+          methods: [MethodDefinition(template: methodTemplate, endpointPath: "/ping", name: "call")]);
       var content = sut!.toString();
       expect(content,
           '''import 'package:coingecko_client/src/endpoints/endpoint_base.dart';
@@ -36,10 +35,10 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
   PingEndpoint(HttpRequestServiceInterface httpRequestService) : super(httpRequestService);
 
   Future<Response> call() async {
-    _path = _baseEndpoint;
     return await send(_path);
   }
-}''');
+}'''
+      );
     });
 
     test('create definition with single method with parameter', () {
@@ -51,6 +50,7 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
             MethodDefinition(
                 template: methodTemplate,
                 name: "call",
+                endpointPath: "/ping",
                 parameters: {
                   'param0': ParameterDefinition(
                       dataType: "String", name: "param0", required: true),
@@ -78,18 +78,18 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
     String? param1,
     bool? param2
   }) async {
-    _path = _baseEndpoint;
-    List<String> keyValueList = [];
-    keyValueList.addAll([
-      setQueryKeyValue('param0', param0),
-      setQueryKeyValue('param1', param1),
-      setQueryKeyValue('param2', param2)
-    ]);
-    keyValueList.removeWhere((e) => e.trim().isEmpty);
-    _path += keyValueList.join('&');
+    _path = createEndpointUrlPath(
+      rawQueryItems: {
+        'param0': param0,
+        'param1': param1,
+        'param2': param2
+      },
+      endpointPath: "/ping"
+    );
     return await send(_path);
   }
-}''');
+}'''
+      );
     });
 
     test('create definition with mutiple method with parameter', () {
@@ -101,6 +101,7 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
             MethodDefinition(
                 template: methodTemplate,
                 name: "call",
+                endpointPath: "/ping",
                 parameters: {
                   'param0': ParameterDefinition(
                       dataType: "String", name: "param0", required: true),
@@ -112,6 +113,7 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
             MethodDefinition(
                 template: methodTemplate,
                 name: "call2",
+                endpointPath: "/ping",
                 parameters: {
                   'param0': ParameterDefinition(
                       dataType: "String", name: "param0", required: true),
@@ -139,15 +141,14 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
     String? param1,
     bool? param2
   }) async {
-    _path = _baseEndpoint;
-    List<String> keyValueList = [];
-    keyValueList.addAll([
-      setQueryKeyValue('param0', param0),
-      setQueryKeyValue('param1', param1),
-      setQueryKeyValue('param2', param2)
-    ]);
-    keyValueList.removeWhere((e) => e.trim().isEmpty);
-    _path += keyValueList.join('&');
+    _path = createEndpointUrlPath(
+      rawQueryItems: {
+        'param0': param0,
+        'param1': param1,
+        'param2': param2
+      },
+      endpointPath: "/ping"
+    );
     return await send(_path);
   }
 
@@ -156,18 +157,18 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
     String? param1,
     bool? param2
   }) async {
-    _path = _baseEndpoint;
-    List<String> keyValueList = [];
-    keyValueList.addAll([
-      setQueryKeyValue('param0', param0),
-      setQueryKeyValue('param1', param1),
-      setQueryKeyValue('param2', param2)
-    ]);
-    keyValueList.removeWhere((e) => e.trim().isEmpty);
-    _path += keyValueList.join('&');
+    _path = createEndpointUrlPath(
+      rawQueryItems: {
+        'param0': param0,
+        'param1': param1,
+        'param2': param2
+      },
+      endpointPath: "/ping"
+    );
     return await send(_path);
   }
-}''');
+}'''
+      );
     });
   });
 }
