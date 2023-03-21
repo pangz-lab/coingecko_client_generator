@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:coingecko_client_generator/models/api_endpoint_definition.dart';
 import 'package:coingecko_client_generator/models/api_parameter_definition.dart';
 import 'package:coingecko_client_generator/models/class_definition.dart';
+import 'package:coingecko_client_generator/models/method_comment_definition.dart';
 import 'package:coingecko_client_generator/models/method_definition.dart';
 import 'package:coingecko_client_generator/models/parameter_definition.dart';
 import 'package:coingecko_client_generator/services/api_definition_parser.dart';
@@ -31,6 +32,7 @@ class CoinGeckoClientGenerator {
 
     for (var endpointGroup in endpointGroupList) {
       classNames = _createClassAndFileName(endpointGroup);
+      print("${classNames["class"]!} get $endpointGroup => ${classNames["class"]!}(_httpService);");
       await _generateClassFile(
         endpointGroup,
         classNames["file"]!,
@@ -54,7 +56,12 @@ class CoinGeckoClientGenerator {
         MethodDefinition(
           template: _methodTemplate,
           name: _convertPathToMethodName(endpointMember),
-          endpointPath: _replaceEndpointPathWithValue(endpointMember, endpointDefinition.parameters),
+          comment: _createMethodComment(
+            endpointDefinition.summary,
+            endpointDefinition.description,
+            _createMethodParameterDesciption(endpointDefinition.parameters),
+          ),
+          endpointPath: endpointMember,
           parameters: endpointDefinition.parameters.map(
             (key, param) {
               return MapEntry(
@@ -72,18 +79,22 @@ class CoinGeckoClientGenerator {
     return methodDefinitionList;
   }
 
-  String _replaceEndpointPathWithValue(String path, Map<String, ApiParameterDefinition> parameters) {
-    if(!path.contains("{")) { return path; }
-    return path.split("/").map(
-      (e) {
-        if(e.contains("{")) {
-          var key = e.replaceAll("{","")
-          .replaceAll("}","");
-          return "\$${_convertNameToLowerCamelCase(parameters[key]!.name)}";
-        }
-        return e;
-      }
-    ).join("/");
+  String _createMethodComment(String summary, String description, String parameterDescription) {
+    return MethodCommentDefinition(
+      summary: summary,
+      description: description,
+      parameterDescription: parameterDescription
+    ).toString();
+  }
+
+  String _createMethodParameterDesciption(Map<String, ApiParameterDefinition> parameters) {
+    return parameters.map((key, value) {
+      return MapEntry(
+        key,
+        "  /// [$key] ${value.description.replaceAll("\n", "\n  /// ")}"
+      );
+      
+    }).values.join("\n");
   }
 
   Map<String, String> _createClassAndFileName(String name) {
@@ -110,11 +121,6 @@ class CoinGeckoClientGenerator {
         }
         return _convertNameToUpperCamelCase(e);
       }).toList().join("")}";
-  }
-
-  String _convertNameToLowerCamelCase(String name) {
-    name = _convertNameToUpperCamelCase(name);
-    return name[0].toLowerCase() + name.substring(1);
   }
 
   String _convertNameToUpperCamelCase(String name) {

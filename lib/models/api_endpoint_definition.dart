@@ -1,7 +1,7 @@
 import 'package:coingecko_client_generator/models/api_parameter_definition.dart';
 
 class ApiEndpointDefinition {
-  ApiEndpointDefinition({
+  const ApiEndpointDefinition({
     required this.path,
     required this.tag,
     required this.summary,
@@ -10,11 +10,11 @@ class ApiEndpointDefinition {
     required this.responseDescription,
     required this.parameters,
   });
-  String path;
-  String tag;
-  String summary;
-  String description;
-  int responseCode;
-  String responseDescription;
-  Map<String, ApiParameterDefinition> parameters;
+  final String path;
+  final String tag;
+  final String summary;
+  final String description;
+  final int responseCode;
+  final String responseDescription;
+  final Map<String, ApiParameterDefinition> parameters;
 }

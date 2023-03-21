@@ -20,7 +20,7 @@ void main() {
           template: classTemplate,
           name: "PingEndpoint",
           baseEndpoint: "/ping",
-          methods: [MethodDefinition(template: methodTemplate, endpointPath: "/ping", name: "call")]);
+          methods: [MethodDefinition(template: methodTemplate, endpointPath: "/ping", comment: "", name: "call")]);
       var content = sut!.toString();
       expect(content,
           '''import 'package:coingecko_client/src/endpoints/endpoint_base.dart';
@@ -50,6 +50,7 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
             MethodDefinition(
                 template: methodTemplate,
                 name: "call",
+                comment: "",
                 endpointPath: "/ping",
                 parameters: {
                   'param0': ParameterDefinition(
@@ -102,6 +103,7 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
                 template: methodTemplate,
                 name: "call",
                 endpointPath: "/ping",
+                comment: "",
                 parameters: {
                   'param0': ParameterDefinition(
                       dataType: "String", name: "param0", required: true),
@@ -114,6 +116,7 @@ class PingEndpoint extends EndpointBase implements EndpointInterface {
                 template: methodTemplate,
                 name: "call2",
                 endpointPath: "/ping",
+                comment: "",
                 parameters: {
                   'param0': ParameterDefinition(
                       dataType: "String", name: "param0", required: true),

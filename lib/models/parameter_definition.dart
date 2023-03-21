@@ -1,13 +1,13 @@
 class ParameterDefinition {
-  ParameterDefinition({
+  const ParameterDefinition({
     required this.name,
     required this.dataType,
     required this.required,
   });
 
-  String name;
-  String dataType;
-  bool required;
+  final String name;
+  final String dataType;
+  final bool required;
   String get methodNeutralName => _convertNameToPascalCase();
 
   String _convertNameToPascalCase() {

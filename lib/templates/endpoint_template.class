@@ -2,11 +2,8 @@ import 'package:coingecko_client/src/endpoints/endpoint_base.dart';
 import 'package:coingecko_client/src/services/http_request_service.dart';
 import 'package:http/http.dart';
 
-class CLASS_NAME extends EndpointBase implements EndpointInterface {
-  final String _baseEndpoint = "BASE_ENDPOINT";
+class CLASS_NAME extends EndpointBase {
   String _path = "";
-  @override
-  String get baseEndpoint => _baseEndpoint;
   CLASS_NAME(HttpRequestServiceInterface httpRequestService) : super(httpRequestService);
 
 METHODS

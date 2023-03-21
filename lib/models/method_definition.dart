@@ -1,3 +1,4 @@
+import 'package:coingecko_client_generator/models/method_comment_definition.dart';
 import 'package:coingecko_client_generator/models/parameter_definition.dart';
 
 class MethodDefinition {
@@ -5,13 +6,15 @@ class MethodDefinition {
     required this.template,
     required this.name,
     required this.endpointPath,
+    required this.comment,
     this.parameters
   });
 
-  String template;
-  String name;
-  String endpointPath;
-  Map<String, ParameterDefinition>? parameters;
+  final String template;
+  final String name;
+  final String endpointPath;
+  final String comment;
+  final Map<String, ParameterDefinition>? parameters;
   String _stringifiedParameters = "";
   String _stringifiedQueryKeyValueUpdate = "";
   static final String _logicLine = '''_path = createEndpointUrlPath(
@@ -21,13 +24,6 @@ SET_KV_UPDATE_LINE_ENTRY
       endpointPath: "ENDPOINT_PATH"
     );
     ''';
-//   static final String _logicLine = '''List<String> keyValueList = [];
-//     keyValueList.addAll([
-// SET_KV_UPDATE_LINE_ENTRY
-//     ]);
-//     keyValueList.removeWhere((e) => e.trim().isEmpty);
-//     _path += keyValueList.join('&');
-//     ''';
 
   String _stringifyParameters() {
     if (parameters?.isEmpty ?? true) { return ""; }
@@ -53,20 +49,17 @@ SET_KV_UPDATE_LINE_ENTRY
       _stringifiedQueryKeyValueUpdate = _logicLine.replaceAll(
         "SET_KV_UPDATE_LINE_ENTRY", _stringifiedQueryKeyValueUpdate
       ).replaceAll("ENDPOINT_PATH", endpointPath);
+    } else {
+      _stringifiedQueryKeyValueUpdate = "_path = '$endpointPath';\n    ";
     }
     return template
-        .replaceAll('METHOD_NAME', name)
-        .replaceAll('PARAMETERS', _stringifiedParameters)
-        .replaceAll('BASE_ENDPOINT_UPDATE', _stringifiedQueryKeyValueUpdate);
+      .replaceAll('METHOD_NAME', name)
+      .replaceAll('PARAMETERS', _stringifiedParameters)
+      .replaceAll('BASE_ENDPOINT_UPDATE', _stringifiedQueryKeyValueUpdate)
+      .replaceAll('METHOD_COMMENT', comment);
   }
 
   String _getQueryKeyValueUpdate(String name, String value) {
     return "        '$name': $value";
   }
 }
-
-/***
- * _path += formKeyValueQuery({
-      'coin_id': coinId
-    });
- */

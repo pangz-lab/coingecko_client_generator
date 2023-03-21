@@ -15,6 +15,7 @@ void main() {
       sut = MethodDefinition(
         template: methodTemplate,
         endpointPath: "/ping",
+        comment: "",
         name: "callTest",
       );
       var content = sut!.toString();
@@ -29,6 +30,7 @@ void main() {
           template: methodTemplate,
           name: "callTest",
           endpointPath: "/ping",
+          comment: "",
           parameters: {
             'name': ParameterDefinition(name: 'name', dataType: 'String', required: true),
             'name_key': ParameterDefinition(name: 'name_key', dataType: 'String', required: false),
