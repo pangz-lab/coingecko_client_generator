@@ -1,0 +1,4 @@
+  Future<Response> METHOD_NAME(PARAMETERS) async {
+    _path = _baseEndpoint;
+    BASE_ENDPOINT_UPDATEreturn await send(_path);
+  }
